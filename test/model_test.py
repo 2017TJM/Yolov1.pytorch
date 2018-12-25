@@ -27,3 +27,6 @@ class ModelTest(unittest.TestCase):
 
     def test_detection_head(self):
         self.assertEqual(self.yolo_d_head(self.x).shape, (1, 49, 30))
+
+if __name__ == "__main__":
+    unittest.main()
