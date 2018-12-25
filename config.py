@@ -7,5 +7,6 @@ class Config(object):
     B = 2
     downsample_ratio=64
     detection_head_input_size = (7, 7)
+    data_dir = r"F:\Code\Yolov1\dataset"
 
 cfg = Config()
