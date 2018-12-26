@@ -1,7 +1,7 @@
 import json
 import os
-import torch as t
 import cv2
+import numpy as np
 
 class ShapeDataset(object):
     def __init__(self, root, split='train', transform=None):
@@ -33,10 +33,8 @@ class ShapeDataset(object):
         img = cv2.imread(pathname)
         if self.transform:
             img = self.transform(img)
-        img = img.transpose(2, 0, 1)
-        img = t.tensor(img)
-        bboxes = t.Tensor(bboxes)
-        labels = t.Tensor(labels).int()
+        bboxes = np.array(bboxes).astype(np.int32)
+        labels = np.array(labels).astype(np.int32)
 
         return img, bboxes, labels
 
