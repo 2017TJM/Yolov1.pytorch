@@ -22,11 +22,11 @@ class ShapeDataset(object):
 
         for bbox in objects:
             # top left
-            x_min = bbox["bounding_box"]["minimum"]["r"]
-            y_min = bbox["bounding_box"]["minimum"]["c"]
+            x_min = bbox["bounding_box"]["minimum"]["c"]
+            y_min = bbox["bounding_box"]["minimum"]["r"]
             # bottom right
-            x_max = bbox["bounding_box"]["maximum"]["r"]
-            y_max = bbox["bounding_box"]["maximum"]["c"]
+            x_max = bbox["bounding_box"]["maximum"]["c"]
+            y_max = bbox["bounding_box"]["maximum"]["r"]
             bboxs.append([x_min, y_min, x_max, y_max])
             labels.append(LABEL_TO_NUMBER[bbox["category"]])
         
@@ -34,7 +34,7 @@ class ShapeDataset(object):
         if self.transform:
             img = self.transform(img)
         bboxs = t.Tensor(bboxs)
-        labels = t.Tensor(labels)
+        labels = t.Tensor(labels).int()
 
         return img, bboxs, labels
 
