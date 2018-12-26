@@ -139,7 +139,24 @@ class RandomSaturation(object):
 
         return image, boxes, labels
 
+class Resize(object):
+    def __init__(self, size=300):
+        self.size = size
 
+    def __call__(self, img, bboxes=None, labels=None):
+        in_size = img.shape
+        img = cv2.resize(img, (self.size, self.size))
+        out_size = img.shape
+
+        y_scale = float(out_size[0]) / in_size[0]
+        x_scale = float(out_size[1]) / in_size[1]
+        bboxes[:, 0] = x_scale * bboxes[:, 0]
+        bboxes[:, 2] = x_scale * bboxes[:, 2]
+        bboxes[:, 1] = y_scale * bboxes[:, 1]
+        bboxes[:, 3] = y_scale * bboxes[:, 3]
+        bboxes = bboxes.astype(np.int32)
+
+        return img, bboxes, labels
 
 class YoloAugmentation(object):
     def __init__(self, size=448, mean=(125, 125, 125)):
@@ -151,9 +168,10 @@ class YoloAugmentation(object):
             RandomBrightness(),
             RandomSaturation(),
             ConvertColor(current="HSV", transform="BGR"),
-            Crop(size=size),
+            Resize(size),
             SubtractMeans(mean)
         ])
 
     def __call__(self, img, bboxes, labels):
         return self.pipe(img, bboxes, labels)
+
