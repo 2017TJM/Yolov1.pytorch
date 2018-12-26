@@ -1,8 +1,7 @@
 import json
 import os
-from PIL import Image
 import torch as t
-from torchvision.transforms.functional import to_tensor
+import cv2
 
 class ShapeDataset(object):
     def __init__(self, root, split='train', transform=None):
@@ -31,10 +30,11 @@ class ShapeDataset(object):
             bboxes.append([x_min, y_min, x_max, y_max])
             labels.append(LABEL_TO_NUMBER[bbox["category"]])
         
-        img = Image.open(pathname)
+        img = cv2.imread(pathname)
         if self.transform:
             img = self.transform(img)
-        img = to_tensor(img)
+        img = img.transpose(2, 0, 1)
+        img = t.tensor(img)
         bboxes = t.Tensor(bboxes)
         labels = t.Tensor(labels).int()
 
