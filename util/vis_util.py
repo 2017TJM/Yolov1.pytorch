@@ -24,5 +24,6 @@ def plot_bbox(img, bboxes, labels, label_to_color):
 
     plt.axis('off')
     plt.imshow(img)
+    plt.show()
     return img
 
