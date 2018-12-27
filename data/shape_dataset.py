@@ -4,8 +4,7 @@ import cv2
 import numpy as np
 
 class ShapeDataset(object):
-    def __init__(self, root, split='train', transform=None):
-        self.transform = transform
+    def __init__(self, root, split='train'):
         self.imgdir = os.path.join(root, 'images')
         annfile = os.path.join(root, split + '.json')
         self.ann = json.load(open(annfile, 'r'))
@@ -31,8 +30,6 @@ class ShapeDataset(object):
             labels.append(LABEL_TO_NUMBER[bbox["category"]])
         
         img = cv2.imread(pathname)
-        if self.transform:
-            img = self.transform(img)
         bboxes = np.array(bboxes).astype(np.int32)
         labels = np.array(labels).astype(np.int32)
 
