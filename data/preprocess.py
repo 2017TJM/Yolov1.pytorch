@@ -79,7 +79,7 @@ class Crop(object):
         img = img[rect[1]:rect[3], rect[0]:rect[2], :]
         
         # remove bbox beyond the croped image
-        intersections = intersect(rect.reshape(1, -4), bboxes).squeeze()
+        intersections = intersect(t.from_numpy(rect.reshape(1, -4)), t.from_numpy(bboxes)).squeeze().numpy()
         bboxes = bboxes[intersections > 0]
 
         bboxes[:, :2] = np.maximum(bboxes[:, :2], rect[:2])
