@@ -1,11 +1,6 @@
 import numpy as np
 
 def intersect(bboxes_a, bboxes_b):
-    """
-    Compute the intersections
-        :param bboxes_a: [num_bbox_a, 4]
-        :param bboxes_b: [num_bbox_b, 4]
-    """
     # [num_bbox_a, num_bbox_b, 4]
     A = bboxes_a.shape[0]
     B = bboxes_b.shape[0]
@@ -44,39 +39,86 @@ def IOU(bboxes_a, bboxes_b):
 
 def match(bbox_pred, bbox_gt):
     """
-    Match bbox from prediction with ground-truth bbox
-        :param bbox_pred: [num_cell, num_bbox, 5]
-        :param bbox_gt: [num_gt_bbox, 4]
+
+    Parameters
+    ----------
+    bbox_pred: [num_bbox_pred, 4]
+    bbox_gt: [num_bbox_gt, 4]
+
+    Returns
+    -------
+    indices: [num_bbox_gt, ]. The bboxes of bbox_pred which have the maximun IOU with bbox_gt
     """
-    bbox_pred = bbox_pred.reshape(-1, 5)
-    # [num_gt_bbox, num_cell*num_bbox]
-    iou = IOU(bbox_gt, bbox_pred[:, 1:])
+    # [num_gt_bbox, num_bbox_pred]
+    iou = IOU(bbox_gt, bbox_pred)
     return np.argmax(iou, axis=1)
 
 def xywh_to_xyxy(bboxes, S=7, feat_stride=64):
     """
-    Convert bbox predictions of yolo from (x, y, w, h) to (x_min, y_min, x_max, y_max)
-        :param bboxes: [num_cell, num_bbox, 5]
-        :param feat_stride=64: 
+    Convert bbox format from (x, y, \sqrt{w}, \sqrt{h}) to (x_min, y_min, x_max, y_max).
+    x and y is relative to the grid cell. w and h is relative to the whole image.
+    
+    Parameters
+    ----------
+    bboxes: [S*S, num_bbox, 4]
+    S=7: The original image is divided into a grid of S*S
+    feat_stride=64: Downsample ratio of the network
+
+    Returns
+    -------
+    new_bboxes: Size [num_bbox, 4]. Format (x_min, y_min, x_max, y_max).
+
     """
     num_bbox = bboxes.shape[1]
 
     x_offset = np.arange(0, S).reshape(S, 1, 1) * feat_stride
     y_offset = np.transpose(x_offset, [1, 0, 2])
 
-    bboxes = bboxes.reshape(S, S, num_bbox, 5)
-    bboxes[:, :, :, 1] = bboxes[:, :, :, 1] * feat_stride + x_offset
-    bboxes[:, :, :, 2] = bboxes[:, :, :, 2] * feat_stride + y_offset
-    bboxes[:, :, :, 3:] = bboxes[:, :, :, 3:] * S * feat_stride 
-    bboxes = bboxes.reshape(-1, num_bbox, 5)
+    bboxes = bboxes.reshape(S, S, num_bbox, 4)
+    bboxes[:, :, :, 0] = bboxes[:, :, :, 0] * feat_stride + x_offset
+    bboxes[:, :, :, 1] = bboxes[:, :, :, 1] * feat_stride + y_offset
+    bboxes[:, :, :, 2:] = bboxes[:, :, :, 2:] * S * feat_stride 
+    bboxes = bboxes.reshape(-1, num_bbox, 4)
 
     new_bboxes = np.zeros_like(bboxes)
-    new_bboxes[:, :, 0] = bboxes[:, :, 0]
-    new_bboxes[:, :, 1] = bboxes[:, :, 1] - bboxes[:, :, 3] / 2
-    new_bboxes[:, :, 2] = bboxes[:, :, 2] - bboxes[:, :, 4] / 2
-    new_bboxes[:, :, 3] = bboxes[:, :, 1] + bboxes[:, :, 3] / 2
-    new_bboxes[:, :, 4] = bboxes[:, :, 2] + bboxes[:, :, 4] / 2
+    w = bboxes[:, :, 2]**2
+    h = bboxes[:, :, 3]**2
+    new_bboxes[:, :, 0] = bboxes[:, :, 0] - w / 2
+    new_bboxes[:, :, 1] = bboxes[:, :, 1] - h / 2
+    new_bboxes[:, :, 2] = bboxes[:, :, 0] + w / 2
+    new_bboxes[:, :, 3] = bboxes[:, :, 1] + h / 2
 
     new_bboxes = np.clip(new_bboxes, a_min=0, a_max=S*feat_stride)
     return new_bboxes
     
+def xyxy_to_xywh(bboxes, S=7, feat_stride=64):
+    """
+    Convert bbox format from (x_min, y_min, x_max, y_max) to (x, y, \sqrt{w}, \sqrt{h}).
+    x and y is relative to the grid cell. w and h is relative to the whole image.
+    
+    Parameters
+    ----------
+    bboxes: [num_bbox, 4]
+    S=7: The original image is divided into a grid of S*S
+    feat_stride=64: Downsample ratio of the network
+
+    Returns
+    -------
+    new_bboxes: Size [num_bbox, 4]. Format (x, y, \sqrt{w}, \sqrt{w}).
+    """
+    new_bboxes = np.zeros_like(bboxes, dtype=np.float32)
+
+    wh = bboxes[:, 2:] - bboxes[:, :2]
+    wh = np.sqrt(wh / (feat_stride * S))
+
+    center = (bboxes[:, :2] + bboxes[:, 2:]) / 2
+    # Remove x_offset and y_offset
+    center %= feat_stride
+    
+    center /= feat_stride
+
+    new_bboxes[:, :2] = center
+    new_bboxes[:, 2:] = wh
+    
+    return new_bboxes
+
