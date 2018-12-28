@@ -1,4 +1,4 @@
-import numpy as np
+import torch as t
 
 # def intersect(bboxes_a, bboxes_b):
 #     # [num_bbox_a, num_bbox_b, 4]
