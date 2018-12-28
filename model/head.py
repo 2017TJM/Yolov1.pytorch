@@ -38,4 +38,5 @@ class DetectionHead(Module):
     def forward(self, x):
         x = self.feature(x).view(-1, )
         x = self.regresor(x)
-        return x.view(-1, self.input_size[0]*self.input_size[1], self.B*5 + self.C)
+        # return x.view(-1, self.input_size[0]*self.input_size[1], self.B*5 + self.C)
+        return x
