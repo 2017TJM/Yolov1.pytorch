@@ -1,13 +1,15 @@
 import json
 import os
 import cv2
+import torch as t
 import numpy as np
 
 class ShapeDataset(object):
-    def __init__(self, root, split='train'):
+    def __init__(self, root, split='train', transform=None):
         self.imgdir = os.path.join(root, 'images')
         annfile = os.path.join(root, split + '.json')
         self.ann = json.load(open(annfile, 'r'))
+        self.transform = transform
 
     def __len__(self):
         return len(self.ann)
@@ -30,8 +32,14 @@ class ShapeDataset(object):
             labels.append(LABEL_TO_NUMBER[bbox["category"]])
         
         img = cv2.imread(pathname)
-        bboxes = np.array(bboxes).astype(np.int32)
-        labels = np.array(labels).astype(np.int32)
+        bboxes = np.array(bboxes)
+        labels = np.array(labels)
+
+        if self.transform:
+            img, bboxes, labels = self.transform(img, bboxes, labels)
+        img = t.from_numpy(img)
+        bboxes = t.from_numpy(bboxes).int()
+        labels = t.from_numpy(labels).int()
 
         return img, bboxes, labels
 
