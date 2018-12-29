@@ -2,7 +2,7 @@
 class Config(object):
     is_cuda = True
     # num_classes
-    C = 20
+    C = 3
     # num_bboxes
     B = 2
     S = 7
