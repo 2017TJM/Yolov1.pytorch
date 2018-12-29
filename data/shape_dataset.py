@@ -37,7 +37,7 @@ class ShapeDataset(object):
 
         if self.transform:
             img, bboxes, labels = self.transform(img, bboxes, labels)
-        img = t.from_numpy(img)
+        img = t.from_numpy(img).permute(2, 0, 1)
         bboxes = t.from_numpy(bboxes).int()
         labels = t.from_numpy(labels).int()
 
