@@ -75,10 +75,13 @@ class YoloLoss(Module):
             bbox_pred_xyxy[:, :2] = bboxes_pred[:, :2] - bboxes_pred[:, 2:]**2 / 2
             bbox_pred_xyxy[:, 2:] = bboxes_pred[:, :2] + bboxes_pred[:, 2:]**2 / 2
 
-            indices = match(bbox_target_xyxy, bbox_pred_xyxy)
+            matched_indices = match(bbox_target_xyxy, bbox_pred_xyxy)
+            not_matched_indices = t.tensor(list(set(range(bboxes_conf.shape[0])) - set(matched_indices.tolist()))).long()
             bbox_target[:, 2:] = t.sqrt(bbox_target[:, 2:])
-            coord_loss = coord_loss + self.coord_scale * t.sum((bbox_target - bboxes_pred[indices, :])**2)
-            conf_loss = conf_loss + t.sum((1 - bboxes_conf[indices])**2)
+            coord_loss = coord_loss + self.coord_scale * t.sum((bbox_target - bboxes_pred[matched_indices, :])**2)
+            conf_loss = conf_loss + t.sum((1 - bboxes_conf[matched_indices])**2)
+            conf_loss = conf_loss + self.noobj_scale * t.sum(bboxes_conf[not_matched_indices]**2)
+
 
         # class_prob loss
         obj_pred_class = obj_pred[:, self.B*5:]
