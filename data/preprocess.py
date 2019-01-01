@@ -164,12 +164,12 @@ class YoloAugmentation(object):
         self.size = size
         self.pipe = Compose([
             ConvertFromInts(),
-            ConvertColor(),
-            RandomBrightness(),
-            RandomSaturation(),
-            ConvertColor(current="HSV", transform="BGR"),
+            # ConvertColor(),
+            # RandomBrightness(),
+            # RandomSaturation(),
+            # ConvertColor(current="HSV", transform="BGR"),
             Resize(size),
-            SubtractMeans(mean)
+            # SubtractMeans(mean)
         ])
 
     def __call__(self, img, bboxes, labels):
