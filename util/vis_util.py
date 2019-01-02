@@ -20,7 +20,7 @@ def plot_bbox(img, bboxes, labels, label_to_color):
     # Attention!!!!
     img = img.copy()
     for i in range(len(bboxes)):
-        cv2.rectangle(img, (bboxes[i, 0], bboxes[i, 1]), (bboxes[i, 2], bboxes[i, 3]), label_to_color[labels[i]], 1)
+        cv2.rectangle(img, (bboxes[i, 1], bboxes[i, 0]), (bboxes[i, 3], bboxes[i, 2]), label_to_color[labels[i]], 1)
 
     plt.axis('off')
     plt.imshow(img)

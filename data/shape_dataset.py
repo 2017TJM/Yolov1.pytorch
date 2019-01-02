@@ -3,8 +3,9 @@ import os
 import cv2
 import torch as t
 import numpy as np
+from torch.utils.data import Dataset
 
-class ShapeDataset(object):
+class ShapeDataset(Dataset):
     def __init__(self, root, split='train', transform=None):
         self.imgdir = os.path.join(root, 'images')
         annfile = os.path.join(root, split + '.json')
@@ -23,11 +24,11 @@ class ShapeDataset(object):
 
         for bbox in objects:
             # top left
-            x_min = bbox["bounding_box"]["minimum"]["c"]
-            y_min = bbox["bounding_box"]["minimum"]["r"]
+            x_min = bbox["bounding_box"]["minimum"]["r"]
+            y_min = bbox["bounding_box"]["minimum"]["c"]
             # bottom right
-            x_max = bbox["bounding_box"]["maximum"]["c"]
-            y_max = bbox["bounding_box"]["maximum"]["r"]
+            x_max = bbox["bounding_box"]["maximum"]["r"]
+            y_max = bbox["bounding_box"]["maximum"]["c"]
             bboxes.append([x_min, y_min, x_max, y_max])
             labels.append(LABEL_TO_NUMBER[bbox["category"]])
         
