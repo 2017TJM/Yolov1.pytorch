@@ -22,7 +22,7 @@ class VocDataset(Dataset):
         self.__annpath = os.path.join(root, 'VOC' + year, "Annotations", "{id}.xml")
         self.ids = []
 
-        with open(os.path.join(root, 'VOC' + year, 'imageSets', 'Main', split + '.txt'), 'r') as fin:
+        with open(os.path.join(root, 'VOC' + year, 'ImageSets', 'Main', split + '.txt'), 'r') as fin:
             for line in fin.readlines():
                 self.ids.append(line.strip())
 
