@@ -68,20 +68,3 @@ class VocDataset(Dataset):
         return np.array(bboxes), np.array(labels), np.array(difficult)
 
 
-if __name__ == "__main__":
-    import sys
-    sys.path.append('../')
-    from util.vis_util import plot_image, plot_bbox
-    from data.preprocess import YoloAugmentation
-
-    transform = YoloAugmentation()
-    dataset = VocDataset(root=r"F:\Resource\VOCdevkit", transform=transform)
-    img, bboxes, labels = dataset[125]
-    
-    img = img.numpy().transpose(1, 2, 0)
-    
-    img_b = plot_bbox(img, bboxes, labels, ((179, 238, 58),(205, 0, 0), (205, 105, 201),(179, 238, 58),(205, 0, 0), (205, 105, 201),(179, 238, 58),(205, 0, 0), (205, 105, 201),(179, 238, 58),(205, 0, 0), (205, 105, 201),(179, 238, 58),(205, 0, 0), (205, 105, 201),(179, 238, 58),(205, 0, 0), (205, 105, 201)))
-
-    
-    
-    
